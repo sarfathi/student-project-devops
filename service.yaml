@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: student-app-service
+spec:
+  type: NodePort
+  selector:
+    app: student-app
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+      nodePort: 30001 # You will access the app at localhost:30001
+      

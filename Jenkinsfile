@@ -1,33 +1,23 @@
 pipeline {
     agent any
-
     stages {
         stage('Checkout') {
-            steps {
-                // This pulls your code from GitHub to the Jenkins workspace
-                git branch: 'main', url: 'https://github.com/sarfathi/student-project-devops.git'
-            }
+            steps { git branch: 'main', url: 'https://github.com/sarfathi/student-project-devops.git' }
         }
-
         stage('Build JAR') {
-            steps {
-                // Uses the Maven Wrapper to package your Java 21 app
-                bat 'mvnw.cmd clean package -DskipTests'
-            }
+            steps { bat 'mvnw.cmd clean package -DskipTests' }
         }
-
         stage('Docker Build') {
-            steps {
-                // Builds the Docker image using the Dockerfile you created
-                bat 'docker build -t student-app .'
-            }
+            steps { bat 'docker build -t student-app:latest .' }
         }
-
-        stage('Deploy') {
+        stage('Kubernetes Deploy') {
             steps {
-                // Removes any old container and runs the new one on port 8081
-                bat 'docker rm -f student-app-container || true'
-                bat 'docker run -d -p 8081:8081 --name student-app-container student-app'
+                // This applies the YAML files to your local Kubernetes cluster
+                bat 'kubectl apply -f deployment.yaml'
+                bat 'kubectl apply -f service.yaml'
+                
+                // Optional: Force a restart to use the newest image
+                bat 'kubectl rollout restart deployment/student-app-deployment'
             }
         }
     }
